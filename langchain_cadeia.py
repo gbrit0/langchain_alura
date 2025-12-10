@@ -2,10 +2,14 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate
 
-from langchain.chains import LLMChain, SimpleSequentialChain
+from langchain_classic.chains import LLMChain, SimpleSequentialChain
+from langchain_classic.globals import set_debug
+
 
 from dotenv import load_dotenv
 import os
+
+set_debug(True)
 
 load_dotenv(override=True)
 apikey = os.environ['OPENAI_API_KEY']
@@ -17,7 +21,7 @@ llm = ChatOpenAI(
 )
 
 modelo_cidade = ChatPromptTemplate.from_template(
-    "Sugira uma cidade dado o meu interesse por {interesse}."
+    "Sugira uma cidade dado o meu interesse por {interesse}. A sua saída deve ser SOMENTE o nome da cidade. Cidade:"
 )
 
 modelo_restaurantes = ChatPromptTemplate.from_template(
@@ -28,8 +32,11 @@ modelo_cultural = ChatPromptTemplate.from_template(
     "Sugira atividades e locais culturais em {cidade}."
 )
 
-cadeia_cidade = LLMChain(prompt=modelo_cidade, llm=llm)
+cadeia_cidade = LLMChain(prompt=modelo_cidade, llm=llm) # É possível passar mais de um modelo de llm. Por exemplo usar o groq etc...
 cadeia_reataurantes = LLMChain(prompt=modelo_restaurantes, llm=llm)
 cadeia_cultural = LLMChain(prompt=modelo_cultural, llm=llm)
 
-cadeia = SimpleSequentialChain(chains=[cadeia_cidade, cadeia_reataurantes, cadeia_cultural])
+cadeia = SimpleSequentialChain(chains=[cadeia_cidade, cadeia_reataurantes, cadeia_cultural], verbose=True)
+
+resultado = cadeia.invoke("praias")
+print(resultado)
