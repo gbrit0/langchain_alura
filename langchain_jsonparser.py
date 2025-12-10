@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import Field, BaseModel
+from pydantic import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 
 from langchain_classic.chains import LLMChain, SimpleSequentialChain
@@ -19,7 +19,7 @@ apikey = os.environ['OPENAI_API_KEY']
 
 class Destino(BaseModel):
     cidade = Field("Cidade a visitar")
-    motivo = Fiel("Motivo pelo qual é interessante visitar a cidade")
+    motivo = Field("Motivo pelo qual é interessante visitar a cidade")
 
 parser = JsonOutputParser(pydantic_object=Destino)
 
