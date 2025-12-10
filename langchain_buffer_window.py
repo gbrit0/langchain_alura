@@ -7,7 +7,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 from langchain_classic.chains import ConversationChain
 from langchain_classic.globals import set_debug
-from langchain_classic.memory import ConversationBufferMemory
+from langchain_classic.memory import ConversationBufferWindowMemory
 
 from dotenv import load_dotenv
 from operator import itemgetter
@@ -33,7 +33,7 @@ mensagens = [
     "Na primeira cidade que você sugeriu lá atrás, quero saber 5 restaurantes para visitar. Responda somente o nome da cidade e o nome dos restaurantes.",
 ]
 
-memoria = ConversationBufferMemory()
+memoria = ConversationBufferWindowMemory(k=2)
 
 conversation = ConversationChain(llm=llm,
                                  verbose=True,
