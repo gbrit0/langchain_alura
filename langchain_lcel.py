@@ -3,6 +3,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import StrOutputParser
 
 from langchain_classic.chains import LLMChain, SimpleSequentialChain
 from langchain_classic.globals import set_debug
@@ -12,7 +13,7 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
 
-set_debug(True)
+set_debug(True) # Detalhes da execução são impressos no terminal
 
 load_dotenv(override=True)
 apikey = os.environ['OPENAI_API_KEY']
@@ -44,15 +45,17 @@ modelo_cultural = ChatPromptTemplate.from_template(
     "Sugira atividades e locais culturais em {cidade}."
 )
 
-cadeia_cidade = LLMChain(prompt=modelo_cidade, llm=llm) # É possível passar mais de um modelo de llm. Por exemplo usar o groq etc...
-cadeia_reataurantes = LLMChain(prompt=modelo_restaurantes, llm=llm)
-cadeia_cultural = LLMChain(prompt=modelo_cultural, llm=llm)
+parte1 = modelo_cidade | llm | parser # Pegar o modelo de prompt, passar para o llm e depois para o parser
+parte2 = modelo_restaurantes | llm | StrOutputParser()  # Usar um parser simples que converte a saída em string 
+parte3 = modelo_cultural | llm | StrOutputParser()  # Usar um parser simples que converte a saída em string 
 
-cadeia = SimpleSequentialChain(chains=[
-    cadeia_cidade, 
-    cadeia_reataurantes, 
-    cadeia_cultural
-    ], verbose=True)
+cadeia = (
+    parte1 | 
+    {
+        "restaurantes": parte2, 
+        "locais_culturais": parte3
+    }
+)
 
-resultado = cadeia.invoke("praias")
+resultado = cadeia.invoke({"interesse": "praias"})
 print(resultado)
